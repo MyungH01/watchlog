@@ -6,7 +6,3 @@ __pycache__/
 *.db
 .env
 .shots/
-
-# 초기 실험 때의 사본 (녹음 시험 페이지, 예전 요구사항 문서). 저장소에는 올리지 않는다
-tick-test/
-watch-app/
