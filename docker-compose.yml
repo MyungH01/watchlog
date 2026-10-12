@@ -1,0 +1,72 @@
+# 로컬 개발용. `docker compose up --build` 후 http://localhost:8000
+# AWS 대신 LocalStack(S3, SQS)을 쓴다. 아래 AWS 키는 LocalStack용 가짜 값이다.
+x-app: &app
+  build: .
+  environment: &env
+    DATABASE_URL: postgresql+psycopg://watchlog:watchlog@db:5432/watchlog
+    AWS_ENDPOINT_URL: http://localstack:4566
+    AWS_DEFAULT_REGION: ap-northeast-2
+    AWS_ACCESS_KEY_ID: test
+    AWS_SECRET_ACCESS_KEY: test
+    S3_BUCKET: watchlog-local
+    S3_PUBLIC_ENDPOINT_URL: http://localhost:4566
+    SQS_QUEUE_URL: http://localstack:4566/000000000000/watchlog-analysis
+    COOKIE_SECURE: "false"
+    LOG_LEVEL: INFO
+    # 구글 로그인(선택): 프로젝트 폴더의 .env 파일에 값을 넣으면 켜진다. 비어 있으면 익명 전용으로 동작한다.
+    GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID:-}
+    GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET:-}
+    PUBLIC_BASE_URL: ${PUBLIC_BASE_URL:-http://localhost:8000}
+
+services:
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: watchlog
+      POSTGRES_PASSWORD: watchlog
+      POSTGRES_DB: watchlog
+    volumes:
+      - db-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U watchlog"]
+      interval: 3s
+      retries: 20
+
+  localstack:
+    image: localstack/localstack:3.8
+    environment:
+      SERVICES: s3,sqs
+      AWS_DEFAULT_REGION: ap-northeast-2
+    ports:
+      - "4566:4566"   # 브라우저가 녹음과 사진을 직접 올리는 주소
+    volumes:
+      - ./localstack-init.sh:/etc/localstack/init/ready.d/init.sh:ro
+    healthcheck:
+      test: ["CMD-SHELL", "awslocal sqs get-queue-url --queue-name watchlog-analysis"]
+      interval: 3s
+      retries: 30
+
+  migrate:
+    <<: *app
+    command: migrate
+    depends_on:
+      db: { condition: service_healthy }
+
+  api:
+    <<: *app
+    command: api
+    ports:
+      - "8000:8000"
+    depends_on:
+      migrate: { condition: service_completed_successfully }
+      localstack: { condition: service_healthy }
+
+  worker:
+    <<: *app
+    command: worker
+    depends_on:
+      migrate: { condition: service_completed_successfully }
+      localstack: { condition: service_healthy }
+
+volumes:
+  db-data:
