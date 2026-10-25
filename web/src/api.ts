@@ -55,6 +55,23 @@ async function squareJpeg(file: File, size = 1200): Promise<Blob> {
     canvas.toBlob((b) => (b ? resolve(b) : reject(new Error("사진을 처리하지 못했습니다"))), "image/jpeg", 0.88));
 }
 
+export type ClockSync = { offsetMs: number; errorMs: number };
+
+/** 서버 시계가 이 기기 시계보다 몇 ms 앞서 있는지. 여러 번 물어 왕복이 가장 짧았던 응답을 쓴다(오차는 왕복의 절반 이내). */
+export async function syncClock(tries = 5): Promise<ClockSync> {
+  let best = { offsetMs: 0, errorMs: Infinity };
+  for (let i = 0; i < tries; i++) {
+    const sent = Date.now(), t0 = performance.now();
+    const res = await fetch("/api/time", { cache: "no-store" });
+    const rtt = performance.now() - t0;
+    if (!res.ok) throw new Error("서버 시각을 가져오지 못했습니다");
+    const { now_ms } = await res.json();
+    // 서버가 답한 순간을 왕복의 한가운데로 본다
+    if (rtt / 2 < best.errorMs) best = { offsetMs: now_ms - (sent + rtt / 2), errorMs: rtt / 2 };
+  }
+  return best;
+}
+
 export const api = {
   session: () => call<Me>("POST", "/api/session"),
   watches: () => call<Watch[]>("GET", "/api/watches"),

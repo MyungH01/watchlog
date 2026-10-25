@@ -160,6 +160,15 @@ def ready(s: Session = Depends(db)):
     return {"status": "ready"}
 
 
+# ---------- 시간 맞추기 ----------
+
+@app.get("/api/time")
+def server_time(response: Response):
+    # 사진 기록의 촬영 시각과 같은 시계다. 브라우저가 왕복 시간을 재서 자기 시계와의 차이를 구한다
+    response.headers["Cache-Control"] = "no-store"
+    return {"now_ms": now().timestamp() * 1000}
+
+
 # ---------- 세션 ----------
 
 @app.post("/api/session")

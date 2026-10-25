@@ -5,6 +5,7 @@ import { Collection } from "./pages/Collection";
 import { Landing } from "./pages/Landing";
 import { Measure } from "./pages/Measure";
 import { PhotoReading } from "./pages/PhotoReading";
+import { SetTime } from "./pages/SetTime";
 import { WatchDetail } from "./pages/WatchDetail";
 import { WatchForm } from "./pages/WatchForm";
 
@@ -22,9 +23,9 @@ function useRoute(): string[] {
 
 export const go = (path: string) => { location.hash = path; };
 
-/** 주요 화면 세 곳(소개, 컬렉션, 계정)에 공통으로 놓이는 메뉴. 지금 어디에 있는지 표시한다. */
-function Nav({ current, me }: { current: "about" | "watches" | "account"; me: Me }) {
-  const items = [["about", "소개"], ["watches", "컬렉션"], ["account", me.anonymous ? "로그인" : "계정"]] as const;
+/** 주요 화면 네 곳(소개, 컬렉션, 시간, 계정)에 공통으로 놓이는 메뉴. 지금 어디에 있는지 표시한다. */
+function Nav({ current, me }: { current: "about" | "watches" | "time" | "account"; me: Me }) {
+  const items = [["about", "소개"], ["watches", "컬렉션"], ["time", "시간"], ["account", me.anonymous ? "로그인" : "계정"]] as const;
   return (
     <header className="top">
       <button className="wordmark" onClick={() => go("/")}>watchlog</button>
@@ -57,11 +58,12 @@ export function App() {
   let view;
   if (main === "about") view = <><Nav current="about" me={me} /><Landing /></>;
   else if (main === "watches") view = <><Nav current="watches" me={me} /><Collection me={me} /></>;
+  else if (main === "time") view = <><Nav current="time" me={me} /><SetTime /></>;
   else if (main === "account") view = <><Nav current="account" me={me} /><Account me={me} /></>;
   else if (page === "new") view = <WatchForm />;
   else if (page === "watch" && id && sub === "edit") view = <WatchForm watchId={id} />;
   else if (page === "watch" && id && sub === "measure") view = <Measure watchId={id} />;
-  else if (page === "watch" && id && sub === "photo") view = <PhotoReading watchId={id} />;
+  else if (page === "watch" && id && sub === "photo") view = <PhotoReading watchId={id} reset={route[3] === "reset"} />;
   else if (page === "watch" && id) view = <WatchDetail watchId={id} />;
   else view = <><Nav current="watches" me={me} /><Collection me={me} /></>;
 

@@ -55,10 +55,12 @@ small { font-size: 0.78rem; color: var(--muted); }
 
 .top { display: flex; align-items: center; justify-content: space-between; gap: 12px; min-height: 44px; }
 .wordmark { font-weight: 700; font-size: 1.4rem; letter-spacing: -0.03em; padding: 0; text-shadow: 0 1px 12px rgba(0, 0, 0, 0.25); }
-/* 주요 메뉴: 한 덩어리의 유리 알약 안에 세 항목. 지금 있는 곳은 흰색으로 채운다 */
+/* 주요 메뉴: 한 덩어리의 유리 알약 안에 네 항목. 지금 있는 곳은 흰색으로 채운다 */
 .nav { display: flex; gap: 2px; padding: 4px; border-radius: 999px; background: var(--glass); border: 1px solid var(--line); -webkit-backdrop-filter: var(--blur); backdrop-filter: var(--blur); }
 .nav button { padding: 7px 14px; border-radius: 999px; font-size: 0.86rem; color: var(--muted); white-space: nowrap; }
 .nav .on { background: rgba(255, 255, 255, 0.92); color: #1c1c1e; font-weight: 600; }
+/* 좁은 핸드폰에서는 네 항목이 이름 옆에 다 들어오도록 안쪽 여백을 줄인다 */
+@media (max-width: 400px) { .nav button { padding: 7px 8px; } }
 .link { color: var(--ink); text-decoration: underline; text-underline-offset: 3px; padding: 0; font-size: inherit; }
 .empty { align-items: center; text-align: center; padding: 36px 24px; }
 
@@ -290,6 +292,14 @@ input[type="file"] { padding: 10px; font-size: 0.85rem; }
 .clock-input input { text-align: center; font-size: 1.6rem; font-weight: 600; padding: 10px 4px; font-variant-numeric: tabular-nums; }
 .check { flex-direction: row; align-items: center; gap: 10px; font-weight: 400; color: var(--muted); }
 .check input { width: 20px; height: 20px; flex: none; accent-color: var(--accent); }
+
+/* 시간 맞추기 */
+.ring-center b.now { font-size: min(11vw, 2.7rem); letter-spacing: -0.02em; }
+.zones { list-style: none; margin: 0; padding: 0; }
+.zones li { display: grid; grid-template-columns: 1fr auto auto; gap: 10px; align-items: center; padding: 10px 0; border-top: 1px solid var(--line); }
+.zones li:first-child { border-top: 0; padding-top: 0; }
+.zones span { display: flex; flex-direction: column; }
+.zones b { font-size: 1.3rem; font-weight: 600; font-variant-numeric: tabular-nums; }
 
 /* ---------- 첫 방문용 소개 ---------- */
 .shell.wide { max-width: 1040px; }

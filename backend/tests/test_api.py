@@ -26,6 +26,13 @@ def test_health_and_ready(client):
     assert client.get("/ready").status_code == 200
 
 
+def test_server_time_is_public_and_never_cached(client):
+    client.cookies.clear()
+    r = client.get("/api/time")
+    assert abs(r.json()["now_ms"] - datetime.now(timezone.utc).timestamp() * 1000) < 2000
+    assert r.headers["cache-control"] == "no-store"   # 캐시된 시각은 틀린 시각이다
+
+
 def test_requests_without_session_are_rejected(client):
     client.cookies.clear()
     assert client.get("/api/watches").status_code == 401

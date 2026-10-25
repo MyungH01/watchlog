@@ -8,14 +8,14 @@ const dialOffset = (shown: number, real: number) =>
   ((((shown - real + HALF_DIAL) % (2 * HALF_DIAL)) + 2 * HALF_DIAL) % (2 * HALF_DIAL)) - HALF_DIAL;
 
 /** 사진으로 기록: 셔터를 누른 순간의 실제 시각은 서비스가 기억하고, 사용자는 멈춘 사진에서 시계 시각만 읽어 적는다. */
-export function PhotoReading({ watchId }: { watchId: string }) {
+export function PhotoReading({ watchId, reset: startReset = false }: { watchId: string; reset?: boolean }) {
   const video = useRef<HTMLVideoElement>(null);
   const stream = useRef<MediaStream | null>(null);
   const [shot, setShot] = useState<{ at: number; blob: Blob; url: string } | null>(null);
   const [h, setH] = useState("");
   const [m, setM] = useState("");
   const [s, setS] = useState("");
-  const [reset, setReset] = useState(false);
+  const [reset, setReset] = useState(startReset);   // 시간 맞추기 화면에서 넘어오면 미리 체크돼 있다
   const [zoom, setZoom] = useState(false);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
